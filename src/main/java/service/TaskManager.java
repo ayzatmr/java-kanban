@@ -1,7 +1,6 @@
 package service;
 
 import enums.TaskStatus;
-import enums.TaskType;
 import models.Epic;
 import models.Subtask;
 import models.Task;
@@ -13,128 +12,144 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskManager {
-    public final HashMap<Integer, Task> tasks = new HashMap<>();
-    public final HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    public final HashMap<Integer, Epic> epics = new HashMap<>();
+    private final HashMap<Integer, Task> tasks = new HashMap<>();
+    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private final HashMap<Integer, Epic> epics = new HashMap<>();
     private static final AtomicInteger uniqueId = new AtomicInteger();
 
-    public Collection<? extends Task> getAllTasks(TaskType taskType) {
-        if (taskType == TaskType.TASK) {
-            return tasks.values();
-        }
-        if (taskType == TaskType.SUBTASK) {
-            return subtasks.values();
-        }
-        if (taskType == TaskType.EPIC) {
-            return epics.values();
-        }
-        System.out.println("Запрошен неверный тип задачи");
-        return null;
+    public Collection<Task> getAllTasks() {
+        return tasks.values();
     }
 
-    public void deleteAllTasksByType(TaskType taskType) {
-        if (taskType == TaskType.TASK) {
-            tasks.clear();
-            return;
+    public Collection<Subtask> getAllSubtasks() {
+        return subtasks.values();
+    }
+
+    public Collection<Epic> getAllEpics() {
+        return epics.values();
+    }
+
+    public void deleteAllTasks() {
+        tasks.clear();
+    }
+
+    public void deleteAllSubtasks() {
+        for (Epic epic : epics.values()) {
+            epic.getSubtasks().clear();
+            syncEpicStatus(epic);
         }
-        if (taskType == TaskType.SUBTASK) {
-            subtasks.clear();
-            return;
-        }
-        if (taskType == TaskType.EPIC) {
-            // при удалении эпика все подзадачи тоже удаляются
-            epics.clear();
-            subtasks.clear();
+        subtasks.clear();
+    }
+
+    public void deleteAllEpics() {
+        epics.clear();
+        subtasks.clear();
+    }
+
+    public Task getTaskById(int taskId) {
+        return tasks.get(taskId);
+    }
+
+    public Task getSubtaskById(int subtaskId) {
+        return subtasks.get(subtaskId);
+    }
+
+    public Task getEpicById(int epicId) {
+        return epics.get(epicId);
+    }
+
+    public void deleteTaskById(int taskId) {
+        tasks.remove(taskId);
+    }
+
+    public void deleteSubtaskById(int subtaskId) {
+        if (subtasks.get(subtaskId) != null) {
+            Epic epic = epics.get(subtasks.get(subtaskId).getEpicId());
+            if (epic != null) {
+                epic.getSubtasks().remove(subtaskId);
+                subtasks.remove(subtaskId);
+                syncEpicStatus(epic);
+            } else {
+                System.out.println("Эпик не найден");
+            }
         } else {
-            System.out.println("Запрошен неверный тип задачи");
+            System.out.println("Подзадача не найдена");
         }
     }
 
-    public <T extends Task> Task getTaskById(int taskId, TaskType taskType) {
-        if (taskType == TaskType.TASK) {
-            return tasks.get(taskId);
-        }
-        if (taskType == TaskType.SUBTASK) {
-            return subtasks.get(taskId);
-        }
-        if (taskType == TaskType.EPIC) {
-            return epics.get(taskId);
-        }
-        System.out.println("Запрошен неверный тип задачи");
-        return null;
-    }
-
-    public void deleteTaskById(int taskId, TaskType taskType) {
-        if (taskType == TaskType.TASK) {
-            tasks.remove(taskId);
-            return;
-        }
-        if (taskType == TaskType.SUBTASK) {
-            subtasks.remove(taskId);
-            return;
-        }
-        if (taskType == TaskType.EPIC) {
-            // при удалении эпика все подзадачи тоже удаляются
-            Epic epic = epics.get(taskId);
+    public void deleteEpicById(int epicId) {
+        Epic epic = epics.get(epicId);
+        if (epic != null) {
             for (int subtaskId : epic.getSubtasks()) {
                 subtasks.remove(subtaskId);
             }
-            epics.remove(taskId);
+            epics.remove(epicId);
         } else {
-            System.out.println("Запрошен неверный тип задачи");
+            System.out.println("Эпик не найден");
         }
     }
 
-    public void addSubtask(Subtask task) {
-        Epic epic = epics.get(task.getEpicId());
-        if (epic != null) {
-            task.setId(uniqueId.incrementAndGet());
-            subtasks.put(task.getId(), task);
-            epic.getSubtasks().add(task.getId());
-            // обновляем статус эпика при добавлении подзадачи
-            syncEpicStatus(task.getEpicId());
-        } else {
-            System.out.println("Указанный эпик не найден");
-        }
-    }
-
-    public <T extends Task> void addTask(T task) {
-        if (task instanceof Epic) {
-            task.setId(uniqueId.incrementAndGet());
-            epics.put(task.getId(), (Epic) task);
-            return;
-        }
-        if (task instanceof Subtask) {
-            addSubtask((Subtask) task);
-            return;
-        }
+    public Integer addTask(Task task) {
         if (task != null) {
             task.setId(uniqueId.incrementAndGet());
+            tasks.put(task.getId(), task);
+            return task.getId();
+        } else {
+            System.out.println("Передан неверный тип данных");
+        }
+        return null;
+    }
+
+    public Integer addSubtask(Subtask task) {
+        if (task != null) {
+            Epic epic = epics.get(task.getEpicId());
+            if (epic != null) {
+                task.setId(uniqueId.incrementAndGet());
+                subtasks.put(task.getId(), task);
+                epic.getSubtasks().add(task.getId());
+                syncEpicStatus(epic);
+                return task.getId();
+            } else {
+                System.out.println("Эпик не найден");
+            }
+        }
+        return null;
+    }
+
+    public Integer addEpic(Epic epic) {
+        if (epic != null) {
+            epic.setId(uniqueId.incrementAndGet());
+            epics.put(epic.getId(), epic);
+            return epic.getId();
+        } else {
+            System.out.println("Передан неверный тип данных");
+        }
+        return null;
+    }
+
+
+    public void updateTask(Task task) {
+        if (task != null) {
             tasks.put(task.getId(), task);
         } else {
             System.out.println("Передан неверный тип данных");
         }
     }
 
-    public <T extends Task> void updateTask(T task) {
-        if (task instanceof Epic) {
-            epics.put(task.getId(), (Epic) task);
-            return;
+    public void updateSubtask(Subtask subtask) {
+        if (subtask != null) {
+            subtasks.put(subtask.getId(), subtask);
+            syncEpicStatus(epics.get(subtask.getEpicId()));
+        } else {
+            System.out.println("Передан неверный тип данных");
         }
-        if (task instanceof Subtask) {
-            Epic epic = epics.get(task.getId());
-            if (epic != null) {
-                subtasks.put(task.getId(), (Subtask) task);
-                epic.getSubtasks().add(task.getId());
-                // обновляем статус эпика при обновлении подзадачи
-                syncEpicStatus(epic.getId());
-            } else {
-                System.out.println("Эпик не найден");
-            }
-            return;
-        }
-        if (task != null) {
-            tasks.put(task.getId(), task);
+    }
+
+    public void updateEpic(Epic epic) {
+        if (epic != null) {
+            Epic currentEpic = epics.get(epic.getId());
+            currentEpic.setName(epic.getName());
+            currentEpic.setDescription(epic.getDescription());
         } else {
             System.out.println("Передан неверный тип данных");
         }
@@ -149,12 +164,10 @@ public class TaskManager {
         return epicSubtasks;
     }
 
-    private void syncEpicStatus(int epicId) {
-        Epic epic = epics.get(epicId);
-        List<Subtask> subtasks = getEpicSubtasks(epicId);
-        int subtaskSize = epic.getSubtasks().size();
+    private void syncEpicStatus(Epic epic) {
+        List<Subtask> subtasks = getEpicSubtasks(epic.getId());
 
-        if (subtaskSize == 0) {
+        if (subtasks.isEmpty()) {
             epic.setTaskStatus(TaskStatus.NEW);
             return;
         }
@@ -177,24 +190,6 @@ public class TaskManager {
             epic.setTaskStatus(TaskStatus.DONE);
         } else {
             epic.setTaskStatus(TaskStatus.IN_PROGRESS);
-        }
-    }
-
-
-    public void setTaskStatus(Task task, TaskStatus taskStatus) {
-        if (task != null && taskStatus != null) {
-            if (task instanceof Epic) {
-                System.out.println("Нельзя выставить статус эпику");
-                return;
-            }
-            if (task instanceof Subtask) {
-                Subtask subtask = subtasks.get(task.getId());
-                subtask.setTaskStatus(taskStatus);
-                syncEpicStatus(subtask.getEpicId());
-                return;
-            }
-            Task newTask = tasks.get(task.getId());
-            newTask.setTaskStatus(taskStatus);
         }
     }
 }

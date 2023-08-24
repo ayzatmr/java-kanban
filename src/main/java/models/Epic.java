@@ -1,6 +1,7 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Epic extends Task {
     private ArrayList<Integer> subtasks = new ArrayList<>();
@@ -13,9 +14,6 @@ public class Epic extends Task {
         return subtasks;
     }
 
-    public void setSubtasks(ArrayList<Integer> subtasks) {
-        this.subtasks = subtasks;
-    }
 
     @Override
     public String toString() {
@@ -24,7 +22,21 @@ public class Epic extends Task {
                 ", taskStatus=" + super.getTaskStatus() +
                 ", name='" + super.getName() + '\'' +
                 ", description='" + super.getDescription() + '\'' +
-                ", subtasks=" + subtasks + '\'' +
+                ", subtasks='" + subtasks + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Epic)) return false;
+        if (!super.equals(o)) return false;
+        Epic epic = (Epic) o;
+        return subtasks.equals(epic.subtasks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), subtasks);
     }
 }

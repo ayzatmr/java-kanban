@@ -15,7 +15,7 @@ public class TaskManager {
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private static final AtomicInteger uniqueId = new AtomicInteger();
+    private final AtomicInteger uniqueId = new AtomicInteger();
 
     public Collection<Task> getAllTasks() {
         return tasks.values();
@@ -78,12 +78,11 @@ public class TaskManager {
     }
 
     public void deleteEpicById(int epicId) {
-        Epic epic = epics.get(epicId);
+        Epic epic = epics.remove(epicId);
         if (epic != null) {
             for (int subtaskId : epic.getSubtasks()) {
                 subtasks.remove(subtaskId);
             }
-            epics.remove(epicId);
         } else {
             System.out.println("Эпик не найден");
         }
@@ -158,8 +157,13 @@ public class TaskManager {
     public List<Subtask> getEpicSubtasks(int epicId) {
         List<Subtask> epicSubtasks = new ArrayList<>();
         Epic epic = epics.get(epicId);
-        for (Integer subtaskId : epic.getSubtasks()) {
-            epicSubtasks.add(subtasks.get(subtaskId));
+        if (epic != null) {
+            for (Integer subtaskId : epic.getSubtasks()) {
+                epicSubtasks.add(subtasks.get(subtaskId));
+            }
+        }
+        else {
+            System.out.println("Эпик не найден");
         }
         return epicSubtasks;
     }

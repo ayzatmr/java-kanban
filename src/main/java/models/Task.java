@@ -10,9 +10,11 @@ public class Task {
     protected TaskStatus taskStatus;
     protected String name;
     protected String description;
+    protected boolean isViewed;
 
     public Task(String name, String description) {
         this.taskStatus = TaskStatus.NEW;
+        this.isViewed = false;
         this.name = name;
         this.description = description;
     }
@@ -50,6 +52,15 @@ public class Task {
         this.description = description;
     }
 
+    public boolean isViewed() {
+        return isViewed;
+    }
+
+    public void setViewed(boolean viewed) {
+        isViewed = viewed;
+    }
+
+
 
     @Override
     public String toString() {
@@ -58,6 +69,7 @@ public class Task {
                 ", taskStatus=" + taskStatus +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", viewed='" + isViewed + '\'' +
                 '}';
     }
 
@@ -69,11 +81,12 @@ public class Task {
         return id == task.id
                 && taskStatus == task.taskStatus
                 && name.equals(task.name)
-                && description.equals(task.description);
+                && description.equals(task.description)
+                && isViewed == task.isViewed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, taskStatus, name, description);
+        return Objects.hash(id, taskStatus, name, description, isViewed);
     }
 }

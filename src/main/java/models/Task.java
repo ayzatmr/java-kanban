@@ -61,7 +61,6 @@ public class Task {
     }
 
 
-
     @Override
     public String toString() {
         return "Task{" +
@@ -76,7 +75,7 @@ public class Task {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Task)) return false;
+        if (o == null || this.getClass() != o.getClass()) return false;
         Task task = (Task) o;
         return id == task.id
                 && taskStatus == task.taskStatus

@@ -20,7 +20,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Epic> epics = new HashMap<>();
     private final AtomicInteger uniqueId = new AtomicInteger();
 
-    HistoryManager historyManager = Managers.getDefaultHistory();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
     public Collection<Task> getAllTasks() {
@@ -200,16 +200,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void syncEpicStatus(Epic epic) {
-        List<Subtask> subtasks = getEpicSubtasks(epic.getId());
+        List<Subtask> epicSubtasks = getEpicSubtasks(epic.getId());
 
-        if (subtasks.isEmpty()) {
+        if (epicSubtasks.isEmpty()) {
             epic.setTaskStatus(TaskStatus.NEW);
             return;
         }
         int newTask = 0;
         int done = 0;
 
-        for (Subtask task : subtasks) {
+        for (Subtask task : epicSubtasks) {
             if (task.getTaskStatus() == TaskStatus.NEW) {
                 newTask += 1;
             }
@@ -217,11 +217,11 @@ public class InMemoryTaskManager implements TaskManager {
                 done += 1;
             }
         }
-        if (subtasks.size() == newTask) {
+        if (epicSubtasks.size() == newTask) {
             epic.setTaskStatus(TaskStatus.NEW);
             return;
         }
-        if (subtasks.size() == done) {
+        if (epicSubtasks.size() == done) {
             epic.setTaskStatus(TaskStatus.DONE);
         } else {
             epic.setTaskStatus(TaskStatus.IN_PROGRESS);

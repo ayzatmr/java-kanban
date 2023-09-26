@@ -39,13 +39,20 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks() {
+        for (int taskId : tasks.keySet()) {
+            historyManager.remove(taskId);
+        }
         tasks.clear();
     }
 
     @Override
     public void deleteAllSubtasks() {
         for (Epic epic : epics.values()) {
-            epic.getSubtasks().clear();
+            List<Integer> epicSubtasks = epic.getSubtasks();
+            for (int subtaskId : epicSubtasks) {
+                historyManager.remove(subtaskId);
+            }
+            epicSubtasks.clear();
             syncEpicStatus(epic);
         }
         subtasks.clear();
@@ -53,7 +60,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllEpics() {
+        for (int taskId : epics.keySet()) {
+            historyManager.remove(taskId);
+        }
         epics.clear();
+
+        for (int taskId : subtasks.keySet()) {
+            historyManager.remove(taskId);
+        }
         subtasks.clear();
     }
 
@@ -84,6 +98,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTaskById(int taskId) {
         tasks.remove(taskId);
+        historyManager.remove(taskId);
     }
 
     @Override
@@ -93,6 +108,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (epic != null) {
                 epic.getSubtasks().remove(subtaskId);
                 subtasks.remove(subtaskId);
+                historyManager.remove(subtaskId);
                 syncEpicStatus(epic);
             } else {
                 System.out.println("Эпик не найден");
@@ -105,9 +121,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteEpicById(int epicId) {
         Epic epic = epics.remove(epicId);
+        historyManager.remove(epicId);
         if (epic != null) {
             for (int subtaskId : epic.getSubtasks()) {
                 subtasks.remove(subtaskId);
+                historyManager.remove(subtaskId);
             }
         } else {
             System.out.println("Эпик не найден");

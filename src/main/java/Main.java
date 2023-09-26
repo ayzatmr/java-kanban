@@ -90,7 +90,7 @@ public class Main {
         inMemoryTaskManager.getTaskById(secondTaskId);
 
         System.out.println("\n" + "проверить удаление задач из просмотренных" + "\n");
-        System.out.println(history);
+        System.out.println(historyManager.getHistory());
 
         System.out.println("\n" + "удаление задачи по идентификатору" + "\n");
         inMemoryTaskManager.deleteEpicById(firstEpicId);

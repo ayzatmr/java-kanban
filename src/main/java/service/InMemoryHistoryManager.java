@@ -3,23 +3,29 @@ package service;
 import interfaces.HistoryManager;
 import models.Task;
 
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    public static final LinkedList<Task> history = new LinkedList<>();
-    private static final int MAX_HISTORY_SIZE = 9;
+
+    public static final HashMap<Integer, Task> history = new LinkedHashMap<>();
 
     @Override
     public void add(Task task) {
-        if (history.size() > MAX_HISTORY_SIZE) {
-            history.removeFirst();
+        if (history.containsValue(task)) {
+            this.remove(task.getId());
         }
-        history.add(task);
+        history.put(task.getId(), task);
     }
 
     @Override
     public List<Task> getHistory() {
-        return List.copyOf(history);
+        return List.copyOf(history.values());
+    }
+
+    @Override
+    public void remove(int id) {
+        history.remove(id);
     }
 }

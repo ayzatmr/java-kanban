@@ -3,7 +3,7 @@ package service;
 import interfaces.HistoryManager;
 import interfaces.TaskManager;
 
-public class Managers {
+public final class Managers {
     private Managers() {
     }
 

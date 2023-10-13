@@ -5,10 +5,54 @@ import models.Subtask;
 import models.Task;
 import service.Managers;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
+
+import static service.FileBackedTasksManager.loadFromFile;
+
 
 public class Main {
     public static void main(String[] args) {
+        TaskManager manager = new Main().fileManager();
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        Collection<Task> allTasks = manager.getAllTasks();
+        Collection<Subtask> allSubtasks = manager.getAllSubtasks();
+        Collection<Epic> epics = manager.getAllEpics();
+        List<Task> history = historyManager.getHistory();
+    }
+
+    private TaskManager fileManager() {
+        Path path = Paths.get("tasks.csv");
+        TaskManager fileBackedTasksManager = loadFromFile(path.toString());
+
+        Task task = new Task("TASK 1", "DESCRIPTION 1");
+        Task task2 = new Task("TASK 2", "DESCRIPTION 2");
+        int firstTaskId = fileBackedTasksManager.addTask(task);
+        int secondTaskId = fileBackedTasksManager.addTask(task2);
+
+        Epic epic1 = new Epic("EPIC 1", "EPIC DESCRIPTION 1");
+        Epic epic2 = new Epic("EPIC 2", "EPIC DESCRIPTION 2");
+        int firstEpicId = fileBackedTasksManager.addEpic(epic1);
+        int secondEpicId = fileBackedTasksManager.addEpic(epic2);
+
+        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId());
+        Subtask subtask2 = new Subtask("SUBTASK 2", "SUBTASK DESCRIPTION 2", epic1.getId());
+        Subtask subtask3 = new Subtask("SUBTASK 3", "SUBTASK DESCRIPTION 3", epic1.getId());
+        int firstSubtaskId = fileBackedTasksManager.addSubtask(subtask1);
+        int secondSubtaskId = fileBackedTasksManager.addSubtask(subtask2);
+        int thirdSubtaskId = fileBackedTasksManager.addSubtask(subtask3);
+
+        System.out.println("\n" + "проверка получения задач по идентификатору" + "\n");
+        System.out.println(fileBackedTasksManager.getTaskById(firstTaskId));
+        System.out.println(fileBackedTasksManager.getEpicById(firstEpicId));
+        System.out.println(fileBackedTasksManager.getSubtaskById(firstSubtaskId));
+        return fileBackedTasksManager;
+    }
+
+    private static void inMemory() {
         TaskManager inMemoryTaskManager = Managers.getDefault();
         HistoryManager historyManager = Managers.getDefaultHistory();
 

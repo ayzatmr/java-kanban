@@ -1,5 +1,7 @@
 package models;
 
+import enums.TaskType;
+
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -8,6 +10,7 @@ public class Subtask extends Task {
 
     public Subtask(String name, String description, int epicId) {
         super(name, description);
+        this.taskType = TaskType.SUBTASK;
         this.epicId = epicId;
     }
 
@@ -19,12 +22,12 @@ public class Subtask extends Task {
     @Override
     public String toString() {
         return "Subtask{" +
-                "id=" + super.getId() +
-                ", taskStatus=" + super.getTaskStatus() +
-                ", name='" + super.getName() + '\'' +
-                ", description='" + super.getDescription() + '\'' +
-                ", epicId=" + epicId + '\'' +
-                ", viewed='" + isViewed + '\'' +
+                "epicId=" + epicId +
+                ", id=" + id +
+                ", taskStatus=" + taskStatus +
+                ", taskType=" + taskType +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 

@@ -15,12 +15,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final AtomicInteger uniqueId = new AtomicInteger();
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final AtomicInteger uniqueId = new AtomicInteger();
 
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
     public Collection<Task> getAllTasks() {
@@ -74,7 +74,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(int taskId) {
         Task task = tasks.get(taskId);
-        task.setViewed(true);
         historyManager.add(task);
         return task;
     }
@@ -82,7 +81,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getSubtaskById(int subtaskId) {
         Task subtask = subtasks.get(subtaskId);
-        subtask.setViewed(true);
         historyManager.add(subtask);
         return subtask;
     }
@@ -90,7 +88,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getEpicById(int epicId) {
         Task epic = epics.get(epicId);
-        epic.setViewed(true);
         historyManager.add(epic);
         return epic;
     }

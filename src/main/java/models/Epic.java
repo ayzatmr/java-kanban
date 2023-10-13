@@ -1,29 +1,32 @@
 package models;
 
+import enums.TaskType;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
     private final ArrayList<Integer> subtasks = new ArrayList<>();
 
+
     public Epic(String name, String description) {
         super(name, description);
+        this.taskType = TaskType.EPIC;
     }
 
     public ArrayList<Integer> getSubtasks() {
         return subtasks;
     }
 
-
     @Override
     public String toString() {
         return "Epic{" +
-                "id=" + super.getId() +
-                ", taskStatus=" + super.getTaskStatus() +
-                ", name='" + super.getName() + '\'' +
-                ", description='" + super.getDescription() + '\'' +
-                ", subtasks='" + subtasks + '\'' +
-                ", viewed='" + isViewed + '\'' +
+                "subtasks=" + subtasks +
+                ", id=" + id +
+                ", taskStatus=" + taskStatus +
+                ", taskType=" + taskType +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 

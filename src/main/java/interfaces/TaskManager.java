@@ -4,15 +4,14 @@ import models.Epic;
 import models.Subtask;
 import models.Task;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface TaskManager {
-    Collection<Task> getAllTasks();
+    List<Task> getAllTasks();
 
-    Collection<Subtask> getAllSubtasks();
+    List<Subtask> getAllSubtasks();
 
-    Collection<Epic> getAllEpics();
+    List<Epic> getAllEpics();
 
     void deleteAllTasks();
 

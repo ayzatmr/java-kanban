@@ -13,7 +13,7 @@ public class CustomLinkedList {
     Node tail;
     Map<Integer, Node> map = new HashMap<>();
 
-    static class Node {
+    public static class Node {
         int key;
         Task data;
         Node previous;

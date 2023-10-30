@@ -2,12 +2,14 @@ package models;
 
 import enums.TaskType;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
     private final ArrayList<Integer> subtasks = new ArrayList<>();
 
+    private LocalDateTime endTime;
 
     public Epic(String name, String description) {
         super(name, description);
@@ -19,6 +21,15 @@ public class Epic extends Task {
     }
 
     @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    @Override
     public String toString() {
         return "Epic{" +
                 "subtasks=" + subtasks +
@@ -27,6 +38,9 @@ public class Epic extends Task {
                 ", taskType=" + taskType +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
                 '}';
     }
 
@@ -42,11 +56,12 @@ public class Epic extends Task {
             return false;
         }
         Epic epic = (Epic) o;
-        return subtasks.equals(epic.subtasks);
+        return subtasks.equals(epic.subtasks)
+                && endTime.equals(epic.endTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtasks);
+        return Objects.hash(super.hashCode(), subtasks, endTime);
     }
 }

@@ -11,37 +11,34 @@ import models.Task;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
 
     private final String file;
-    private final String FIRST_LINE = "id,type,name,status,description,epic\n";
+    private static final String FIRST_LINE = "id,type,name,status,description,epic,startTime,duration,endTime\n";
 
     public FileBackedTasksManager(String file) {
-        this.file = Paths.get("src", "main", "resources", file).toString();
+        this.file = file;
     }
 
     private String toString(Task task) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(task.getId());
-        sb.append(",");
-        sb.append(task.getTaskType());
-        sb.append(",");
-        sb.append(task.getName());
-        sb.append(",");
-        sb.append(task.getTaskStatus());
-        sb.append(",");
-        sb.append(task.getDescription());
-        sb.append(",");
-
+        StringJoiner joiner = new StringJoiner(",");
+        joiner.add(String.valueOf(task.getId()))
+                .add(String.valueOf(task.getTaskType()))
+                .add(String.valueOf(task.getName()))
+                .add(String.valueOf(task.getTaskStatus()))
+                .add(String.valueOf(task.getDescription()));
         if (task instanceof Subtask) {
-            sb.append(((Subtask) task).getEpicId());
+            joiner.add(String.valueOf(((Subtask) task).getEpicId()));
         }
-        return sb.toString();
+        joiner.add(String.valueOf(task.getStartTime()))
+                .add(String.valueOf(task.getDuration()))
+                .add(String.valueOf(task.getEndTime()));
+        return joiner.toString();
     }
 
     private Task fromString(String value) {
@@ -81,15 +78,26 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     private static List<Integer> historyFromString(String value) {
+        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
         List<Integer> historyIds = new ArrayList<>();
         if (value == null) {
             return historyIds;
         }
         String[] elements = value.split(",");
-        for (String el : elements) {
-            historyIds.add(Integer.parseInt(el));
+        if (pattern.matcher(elements[0]).matches()) {
+            for (String el : elements) {
+                historyIds.add(Integer.parseInt(el));
+            }
         }
         return historyIds;
+    }
+
+    public void createEmptyFile(String path) throws ManagerSaveException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path, false))) {
+            writer.write("");
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка записи в файл");
+        }
     }
 
     private void save() throws ManagerSaveException {

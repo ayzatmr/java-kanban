@@ -2,6 +2,8 @@ package models;
 
 import enums.TaskType;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -12,6 +14,14 @@ public class Subtask extends Task {
         super(name, description);
         this.taskType = TaskType.SUBTASK;
         this.epicId = epicId;
+    }
+
+    public Subtask(String name, String description, int epicId, Duration duration, LocalDateTime startTime) {
+        super(name, description);
+        this.taskType = TaskType.SUBTASK;
+        this.epicId = epicId;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
     public Integer getEpicId() {
@@ -28,6 +38,8 @@ public class Subtask extends Task {
                 ", taskType=" + taskType +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
                 '}';
     }
 

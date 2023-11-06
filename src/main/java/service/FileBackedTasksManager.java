@@ -8,6 +8,8 @@ import interfaces.TaskManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -17,9 +19,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
+    private static final Logger log = LoggerFactory.getLogger(FileBackedTasksManager.class);
 
     private final String file;
     private static final String FIRST_LINE = "id,type,name,status,description,epic,startTime,duration,endTime\n";
+    private static final Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
 
     public FileBackedTasksManager(String file) {
         this.file = file;
@@ -78,7 +82,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     private static List<Integer> historyFromString(String value) {
-        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
         List<Integer> historyIds = new ArrayList<>();
         if (value == null) {
             return historyIds;
@@ -96,6 +99,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path, false))) {
             writer.write("");
         } catch (IOException e) {
+            log.error("Exception: ", e);
             throw new ManagerSaveException("Ошибка записи в файл");
         }
     }
@@ -115,6 +119,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             writer.write(historyToString(historyManager));
 
         } catch (IOException e) {
+            log.error("Exception: ", e);
             throw new ManagerSaveException("Ошибка записи в файл");
         }
     }
@@ -127,6 +132,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 lines.add(fileReader.readLine());
             }
         } catch (IOException e) {
+            log.error("Exception: ", e);
             throw new ManagerSaveException("Произошла ошибка во время чтения файла.");
         }
 
@@ -159,7 +165,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             else if (manager.epics.containsKey(taskId))
                 manager.historyManager.add(manager.epics.get(taskId));
             else {
-                System.out.printf("Задача с id= %s не найдена", taskId);
+                log.info("Задача с id= {} не найдена", taskId);
             }
         }
         manager.setUniqueId();

@@ -7,6 +7,8 @@ import interfaces.TaskManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class InMemoryTaskManager implements TaskManager {
+    private static final Logger log = LoggerFactory.getLogger(InMemoryTaskManager.class);
     protected final Map<Integer, Task> tasks = new TreeMap<>();
     protected final Map<Integer, Subtask> subtasks = new TreeMap<>();
     protected final Map<Integer, Epic> epics = new TreeMap<>();
@@ -119,10 +122,10 @@ public class InMemoryTaskManager implements TaskManager {
                 historyManager.remove(subtaskId);
                 syncEpicStatus(epic);
             } else {
-                System.out.println("Эпик не найден");
+                log.info("Epic is not found");
             }
         } else {
-            System.out.println("Подзадача не найдена");
+            log.info("Subtask is not found");
         }
     }
 
@@ -136,7 +139,7 @@ public class InMemoryTaskManager implements TaskManager {
                 historyManager.remove(subtaskId);
             }
         } else {
-            System.out.println("Эпик не найден");
+            log.info("Epic is not found");
         }
     }
 
@@ -155,7 +158,7 @@ public class InMemoryTaskManager implements TaskManager {
             tasks.put(task.getId(), task);
             return task.getId();
         } else {
-            System.out.println("Передан неверный тип данных");
+            log.info("Wrong data type is provided");
         }
         return null;
     }
@@ -178,7 +181,7 @@ public class InMemoryTaskManager implements TaskManager {
                 syncEpicStatus(epic);
                 return task.getId();
             } else {
-                System.out.println("Эпик не найден");
+                log.info("Epic is not found");
             }
         }
         return null;
@@ -191,7 +194,7 @@ public class InMemoryTaskManager implements TaskManager {
             epics.put(epic.getId(), epic);
             return epic.getId();
         } else {
-            System.out.println("Передан неверный тип данных");
+            log.info("Wrong data type is provided");
         }
         return null;
     }
@@ -208,7 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             tasks.put(task.getId(), task);
         } else {
-            System.out.println("Передан неверный тип данных");
+            log.info("Wrong data type is provided");
         }
     }
 
@@ -225,7 +228,7 @@ public class InMemoryTaskManager implements TaskManager {
             subtasks.put(subtask.getId(), subtask);
             syncEpicStatus(epics.get(subtask.getEpicId()));
         } else {
-            System.out.println("Передан неверный тип данных");
+            log.info("Wrong data type is provided");
         }
     }
 
@@ -236,7 +239,7 @@ public class InMemoryTaskManager implements TaskManager {
             currentEpic.setName(epic.getName());
             currentEpic.setDescription(epic.getDescription());
         } else {
-            System.out.println("Передан неверный тип данных");
+            log.info("Wrong data type is provided");
         }
     }
 
@@ -249,7 +252,7 @@ public class InMemoryTaskManager implements TaskManager {
                 epicSubtasks.add(subtasks.get(subtaskId));
             }
         } else {
-            System.out.println("Эпик не найден");
+            log.info("Epic is not found");
         }
         return epicSubtasks;
     }

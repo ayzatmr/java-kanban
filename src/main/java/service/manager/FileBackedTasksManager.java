@@ -1,4 +1,4 @@
-package service;
+package service.manager;
 
 import enums.TaskStatus;
 import enums.TaskType;
@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -20,6 +23,7 @@ import java.util.stream.Stream;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
     private static final Logger log = LoggerFactory.getLogger(FileBackedTasksManager.class);
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
     private final String file;
     private static final String FIRST_LINE = "id,type,name,status,description,epic,startTime,duration,endTime\n";
@@ -39,9 +43,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         if (task instanceof Subtask) {
             joiner.add(String.valueOf(((Subtask) task).getEpicId()));
         }
-        joiner.add(String.valueOf(task.getStartTime()))
-                .add(String.valueOf(task.getDuration()))
-                .add(String.valueOf(task.getEndTime()));
+        if (task.getStartTime() != null) {
+            joiner.add(task.getStartTime().format(formatter))
+                    .add(String.valueOf(task.getDuration()))
+                    .add(task.getEndTime().format(formatter));
+        }
         return joiner.toString();
     }
 
@@ -53,18 +59,32 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 task.setId(Integer.parseInt(line[0]));
                 task.setTaskType(TaskType.valueOf(line[1]));
                 task.setTaskStatus(TaskStatus.valueOf(line[3]));
+                if (line.length > 5) {
+                    task.setStartTime(LocalDateTime.parse(line[5], formatter));
+                    task.setDuration(Duration.parse(line[6]));
+                }
                 return task;
             case EPIC:
-                Task epic = new Epic(line[2], line[4]);
+                Epic epic = new Epic(line[2], line[4]);
                 epic.setId(Integer.parseInt(line[0]));
                 epic.setTaskType(TaskType.valueOf(line[1]));
                 epic.setTaskStatus(TaskStatus.valueOf(line[3]));
+                if (line.length > 5) {
+                    epic.setStartTime(LocalDateTime.parse(line[5], formatter));
+                    epic.setDuration(Duration.parse(line[6]));
+                    epic.setEndTime(LocalDateTime.parse(line[7], formatter));
+
+                }
                 return epic;
             case SUBTASK:
                 Task subtask = new Subtask(line[2], line[4], Integer.parseInt(line[5]));
                 subtask.setId(Integer.parseInt(line[0]));
                 subtask.setTaskType(TaskType.valueOf(line[1]));
                 subtask.setTaskStatus(TaskStatus.valueOf(line[3]));
+                if (line.length > 6) {
+                    subtask.setStartTime(LocalDateTime.parse(line[6], formatter));
+                    subtask.setDuration(Duration.parse(line[7]));
+                }
                 return subtask;
             default:
                 throw new IllegalStateException("Unexpected value: " + line[1]);

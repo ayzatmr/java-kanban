@@ -3,7 +3,7 @@ import models.Subtask;
 import models.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.InMemoryTaskManager;
+import service.manager.InMemoryTaskManager;
 
 import java.util.List;
 

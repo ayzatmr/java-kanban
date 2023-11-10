@@ -1,4 +1,4 @@
-package service;
+package service.manager;
 
 import enums.TaskStatus;
 import exceptions.ValidateException;
@@ -202,12 +202,15 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         if (task != null) {
-            try {
-                if (isOverlapped(task)) {
-                    throw new ValidateException(ERROR);
+            Task currentTask = tasks.get(task.getId());
+            if (!currentTask.getStartTime().equals(task.getStartTime()) && !currentTask.getEndTime().equals(task.getEndTime())) {
+                try {
+                    if (isOverlapped(task)) {
+                        throw new ValidateException(ERROR);
+                    }
+                } catch (ValidateException ex) {
+                    throw new ValidateException(ex.getMessage());
                 }
-            } catch (ValidateException ex) {
-                throw new ValidateException(ex.getMessage());
             }
             tasks.put(task.getId(), task);
         } else {
@@ -218,12 +221,15 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         if (subtask != null) {
-            try {
-                if (isOverlapped(subtask)) {
-                    throw new ValidateException(ERROR);
+            Subtask currentTask = subtasks.get(subtask.getId());
+            if (!currentTask.getStartTime().equals(subtask.getStartTime()) && !currentTask.getEndTime().equals(subtask.getEndTime())) {
+                try {
+                    if (isOverlapped(subtask)) {
+                        throw new ValidateException(ERROR);
+                    }
+                } catch (ValidateException ex) {
+                    throw new ValidateException(ex.getMessage());
                 }
-            } catch (ValidateException ex) {
-                throw new ValidateException(ex.getMessage());
             }
             subtasks.put(subtask.getId(), subtask);
             syncEpicStatus(epics.get(subtask.getEpicId()));
@@ -329,7 +335,7 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime endTime = task.getEndTime();
         if (startTime == null || endTime == null) return false;
         for (Map.Entry<Integer, ? extends Task> entry : getPrioritizedTasks()) {
-            if (entry.getValue().getStartTime() == null || entry.getValue().getEndTime() == null){
+            if (entry.getValue().getStartTime() == null || entry.getValue().getEndTime() == null) {
                 continue;
             }
             if (startTime.isEqual(entry.getValue().getStartTime()) || endTime.isEqual(entry.getValue().getEndTime())) {

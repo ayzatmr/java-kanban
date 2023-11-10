@@ -46,6 +46,13 @@ public class CustomLinkedList {
 
         Node prev = node.previous;
         Node next = node.next;
+        if (prev == null && next == null) {
+            head = null;
+            tail = null;
+            size--;
+            map.clear();
+            return node.data;
+        }
         if (prev == null) {
             next.previous = null;
             head = next;
@@ -100,5 +107,12 @@ public class CustomLinkedList {
             tail = currentNode;
             map.put(key, tail);
         }
+    }
+
+    public void clear() {
+        head = null;
+        tail = null;
+        size = 0;
+        map.clear();
     }
 }

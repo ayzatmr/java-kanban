@@ -1,4 +1,4 @@
-package service;
+package service.manager;
 
 import interfaces.HistoryManager;
 import models.Task;
@@ -23,5 +23,10 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {
         history.removeNode(history.get(id));
+    }
+
+    @Override
+    public void clear() {
+        history.clear();
     }
 }

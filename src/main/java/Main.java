@@ -22,7 +22,7 @@ public class Main {
     }
 
     private static void checkTaskServer() throws IOException {
-       Path path = Paths.get("src", "main", "resources", "test.csv");
+       Path path = Paths.get("src", "main", "resources", "tasks.csv");
         new HttpTaskServer().start(path.toString());
     }
 }

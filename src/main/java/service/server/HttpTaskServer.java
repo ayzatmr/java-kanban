@@ -72,52 +72,82 @@ public class HttpTaskServer {
 
     }
 
-    private void tasks(HttpExchange h) throws IOException {
+    private void getTaskById(HttpExchange h, String taskId) throws IOException {
         String response;
+        log.info("get task by id = {}", taskId);
+        Task expectedTask = manager.getTaskById(Integer.parseInt(taskId));
+        if (expectedTask == null) {
+            response = "Task is not found";
+            h.sendResponseHeaders(404, response.getBytes().length);
+        } else {
+            response = gson.toJson(expectedTask);
+            h.sendResponseHeaders(200, response.getBytes().length);
+        }
+        try (OutputStream os = h.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+    }
+
+    private void getAllTasks(HttpExchange h) throws IOException {
+        log.info("get all tasks");
+        String response = gson.toJson(manager.getAllTasks());
+        h.sendResponseHeaders(200, response.getBytes().length);
+        try (OutputStream os = h.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+    }
+
+    private void deleteTaskById(HttpExchange h, String taskId) throws IOException {
+        log.info("delete task by id = {}", taskId);
+        manager.deleteTaskById(Integer.parseInt(taskId));
+        h.sendResponseHeaders(204, -1);
+    }
+
+    private void deleteAllTasks(HttpExchange h) throws IOException {
+        log.info("delete all tasks");
+        manager.deleteAllTasks();
+        h.sendResponseHeaders(204, -1);
+    }
+
+    private void createNewTask(HttpExchange h, Task task) throws IOException {
+        log.info("create new task: {}", task);
+        Integer newTaskId = manager.addTask(task);
+        log.info("new task id: {}", newTaskId);
+        h.sendResponseHeaders(200, 0);
+    }
+
+    private void updateTask(HttpExchange h, Task task) throws IOException {
+        log.info("update task: {}", task);
+        manager.updateTask(task);
+        h.sendResponseHeaders(200, 0);
+    }
+
+    private void tasks(HttpExchange h) throws IOException {
+        URI uri = h.getRequestURI();
+        String taskId = getParamMap(uri.getQuery()).get("id");
+        log.info(uri.toString());
         try {
-            URI uri = h.getRequestURI();
-            String taskId = getParamMap(uri.getQuery()).get("id");
-            log.info(uri.toString());
             if ("GET".equals(h.getRequestMethod())) {
                 if (taskId != null) {
-                    log.info("get task by id = {}", taskId);
-                    Task expectedTask = manager.getTaskById(Integer.parseInt(taskId));
-                    if (expectedTask == null) {
-                        response = "Task is not found";
-                        h.sendResponseHeaders(404, response.getBytes().length);
-                    } else {
-                        response = gson.toJson(expectedTask);
-                        h.sendResponseHeaders(200, response.getBytes().length);
-                    }
+                    getTaskById(h, taskId);
                 } else {
-                    response = gson.toJson(manager.getAllTasks());
-                    h.sendResponseHeaders(200, response.getBytes().length);
-                }
-                try (OutputStream os = h.getResponseBody()) {
-                    os.write(response.getBytes());
+                    getAllTasks(h);
                 }
             } else if ("DELETE".equals(h.getRequestMethod())) {
                 if (taskId != null) {
-                    log.info("delete task by id = {}", taskId);
-                    manager.deleteTaskById(Integer.parseInt(taskId));
+                    deleteTaskById(h, taskId);
                 } else {
-                    log.info("delete all tasks");
-                    manager.deleteAllTasks();
+                    deleteAllTasks(h);
                 }
-                h.sendResponseHeaders(204, -1);
             } else if ("POST".equals(h.getRequestMethod())) {
                 String body = new String(h.getRequestBody().readAllBytes(), UTF_8);
                 Task taskFromJson = gson.fromJson(body, Task.class);
                 Task task = manager.getTaskById(taskFromJson.getId());
                 if (task == null) {
-                    log.info("create new task: {}", taskFromJson);
-                    Integer newTaskId = manager.addTask(taskFromJson);
-                    log.info("new task id: {}", newTaskId);
+                    createNewTask(h, taskFromJson);
                 } else {
-                    log.info("update task: {}", taskFromJson);
-                    manager.updateTask(taskFromJson);
+                    updateTask(h, taskFromJson);
                 }
-                h.sendResponseHeaders(200, 0);
             } else {
                 log.warn("/tasks/task is waiting GET/POST/DELETE request, but {} got ", h.getRequestMethod());
                 h.sendResponseHeaders(403, 0);
@@ -129,57 +159,87 @@ public class HttpTaskServer {
         }
     }
 
-    private void subtasks(HttpExchange h) throws IOException {
+
+    private void getSubtaskById(HttpExchange h, String taskId) throws IOException {
         String response;
+        log.info("get subtask by id = {}", taskId);
+        Task expectedTask = manager.getSubtaskById(Integer.parseInt(taskId));
+        if (expectedTask == null) {
+            response = "Subtask is not found";
+            h.sendResponseHeaders(404, response.getBytes().length);
+        } else {
+            response = gson.toJson(expectedTask);
+            h.sendResponseHeaders(200, response.getBytes().length);
+        }
+        try (OutputStream os = h.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+    }
+
+    private void getAllSubtasks(HttpExchange h) throws IOException {
+        log.info("get all subtasks");
+        String response = gson.toJson(manager.getAllSubtasks());
+        h.sendResponseHeaders(200, response.getBytes().length);
+        try (OutputStream os = h.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+    }
+
+    private void deleteSubtaskById(HttpExchange h, String taskId) throws IOException {
+        log.info("delete subtask by id = {}", taskId);
+        manager.deleteSubtaskById(Integer.parseInt(taskId));
+        h.sendResponseHeaders(204, -1);
+    }
+
+    private void deleteAllSubtasks(HttpExchange h) throws IOException {
+        log.info("delete all subtasks");
+        manager.deleteAllSubtasks();
+        h.sendResponseHeaders(204, -1);
+    }
+
+    private void createNewSubtask(HttpExchange h, Subtask task) throws IOException {
+        log.info("create new task: {}", task);
+        Integer newTaskId = manager.addSubtask(task);
+        log.info("new subtask id: {}", newTaskId);
+        h.sendResponseHeaders(200, 0);
+    }
+
+    private void updateSubtask(HttpExchange h, Subtask task) throws IOException {
+        log.info("update subtask: {}", task);
+        manager.updateSubtask(task);
+        h.sendResponseHeaders(200, 0);
+    }
+
+    private void subtasks(HttpExchange h) throws IOException {
+        URI uri = h.getRequestURI();
+        String subtaskId = getParamMap(uri.getQuery()).get("id");
+        log.info(uri.toString());
         try {
-            URI uri = h.getRequestURI();
-            String taskId = getParamMap(uri.getQuery()).get("id");
-            log.info(uri.toString());
             if ("GET".equals(h.getRequestMethod())) {
-                if (taskId != null) {
-                    log.info("get subtask by id = {}", taskId);
-                    Task expectedTask = manager.getSubtaskById(Integer.parseInt(taskId));
-                    if (expectedTask == null) {
-                        response = "Subtask is not found";
-                        h.sendResponseHeaders(404, response.getBytes().length);
-                    } else {
-                        response = gson.toJson(expectedTask);
-                        h.sendResponseHeaders(200, response.getBytes().length);
-                    }
+                if (subtaskId != null) {
+                    getSubtaskById(h, subtaskId);
                 } else {
-                    response = gson.toJson(manager.getAllSubtasks());
-                    h.sendResponseHeaders(200, response.getBytes().length);
-                }
-                try (OutputStream os = h.getResponseBody()) {
-                    os.write(response.getBytes());
+                    getAllSubtasks(h);
                 }
             } else if ("DELETE".equals(h.getRequestMethod())) {
-                if (taskId != null) {
-                    log.info("delete subtask by id = {}", taskId);
-                    manager.deleteSubtaskById(Integer.parseInt(taskId));
+                if (subtaskId != null) {
+                    deleteSubtaskById(h, subtaskId);
                 } else {
-                    log.info("delete all subtasks");
-                    manager.deleteAllSubtasks();
+                    deleteAllSubtasks(h);
                 }
-                h.sendResponseHeaders(204, -1);
             } else if ("POST".equals(h.getRequestMethod())) {
                 String body = new String(h.getRequestBody().readAllBytes(), UTF_8);
                 Subtask taskFromJson = gson.fromJson(body, Subtask.class);
                 Task task = manager.getSubtaskById(taskFromJson.getId());
                 if (task == null) {
-                    log.info("create new subtask: {}", taskFromJson);
-                    Integer newTaskId = manager.addSubtask(taskFromJson);
-                    log.info("new subtask id: {}", newTaskId);
+                    createNewSubtask(h, taskFromJson);
                 } else {
-                    log.info("update subtask: {}", taskFromJson);
-                    manager.updateSubtask(taskFromJson);
+                    updateSubtask(h, taskFromJson);
                 }
-                h.sendResponseHeaders(200, 0);
             } else {
                 log.warn("/tasks/subtask is waiting GET/POST/DELETE request, but {} got ", h.getRequestMethod());
                 h.sendResponseHeaders(403, 0);
             }
-
         } catch (ValidateException e) {
             log.error(e.getMessage());
         } finally {
@@ -187,57 +247,89 @@ public class HttpTaskServer {
         }
     }
 
-    private void epics(HttpExchange h) throws IOException {
+
+    private void getEpicById(HttpExchange h, String taskId) throws IOException {
         String response;
+        log.info("get epic by id = {}", taskId);
+        Task expectedTask = manager.getEpicById(Integer.parseInt(taskId));
+        if (expectedTask == null) {
+            response = "Epic is not found";
+            h.sendResponseHeaders(404, response.getBytes().length);
+        } else {
+            response = gson.toJson(expectedTask);
+            h.sendResponseHeaders(200, response.getBytes().length);
+        }
+        try (OutputStream os = h.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+    }
+
+    private void getAllEpics(HttpExchange h) throws IOException {
+        log.info("get all epics");
+        String response = gson.toJson(manager.getAllEpics());
+        h.sendResponseHeaders(200, response.getBytes().length);
+        try (OutputStream os = h.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+    }
+
+    private void deleteEpicById(HttpExchange h, String epicId) throws IOException {
+        log.info("delete epic by id = {}", epicId);
+        manager.deleteEpicById(Integer.parseInt(epicId));
+        h.sendResponseHeaders(204, -1);
+    }
+
+    private void deleteAllEpics(HttpExchange h) throws IOException {
+        log.info("delete all epics");
+        manager.deleteAllEpics();
+        h.sendResponseHeaders(204, -1);
+    }
+
+    private void createNewEpic(HttpExchange h, Epic epic) throws IOException {
+        log.info("create new epic: {}", epic);
+        Integer epicId = manager.addEpic(epic);
+        log.info("new epic id: {}", epicId);
+        h.sendResponseHeaders(200, 0);
+    }
+
+    private void updateEpic(HttpExchange h, Epic epic) throws IOException {
+        log.info("update epic: {}", epic);
+        manager.updateEpic(epic);
+        h.sendResponseHeaders(200, 0);
+    }
+
+    private void epics(HttpExchange h) throws IOException {
+        URI uri = h.getRequestURI();
+        String epicId = getParamMap(uri.getQuery()).get("id");
+        log.info(uri.toString());
         try {
-            URI uri = h.getRequestURI();
-            String epicId = getParamMap(uri.getQuery()).get("id");
-            log.info(uri.toString());
             if ("GET".equals(h.getRequestMethod())) {
                 if (epicId != null) {
-                    log.info("get epic by id = {}", epicId);
-                    Task expectedTask = manager.getEpicById(Integer.parseInt(epicId));
-                    if (expectedTask == null) {
-                        response = "Epic is not found";
-                        h.sendResponseHeaders(404, response.getBytes().length);
-                    } else {
-                        response = gson.toJson(expectedTask);
-                        h.sendResponseHeaders(200, response.getBytes().length);
-                    }
+                    getEpicById(h, epicId);
                 } else {
-                    response = gson.toJson(manager.getAllEpics());
-                    h.sendResponseHeaders(200, response.getBytes().length);
-                }
-                try (OutputStream os = h.getResponseBody()) {
-                    os.write(response.getBytes());
+                    getAllEpics(h);
                 }
             } else if ("DELETE".equals(h.getRequestMethod())) {
                 if (epicId != null) {
-                    log.info("delete epic by id = {}", epicId);
-                    manager.deleteEpicById(Integer.parseInt(epicId));
+                    deleteEpicById(h, epicId);
                 } else {
-                    log.info("delete all epics");
-                    manager.deleteAllEpics();
+                    deleteAllEpics(h);
                 }
-                h.sendResponseHeaders(204, -1);
-
             } else if ("POST".equals(h.getRequestMethod())) {
                 String body = new String(h.getRequestBody().readAllBytes(), UTF_8);
                 Epic taskFromJson = gson.fromJson(body, Epic.class);
                 Task task = manager.getEpicById(taskFromJson.getId());
                 if (task == null) {
-                    log.info("create new epic: {}", taskFromJson);
-                    Integer newTaskId = manager.addEpic(taskFromJson);
-                    log.info("new epic id: {}", newTaskId);
+                    createNewEpic(h, taskFromJson);
                 } else {
-                    log.info("update epic: {}", taskFromJson);
-                    manager.updateEpic(taskFromJson);
+                    updateEpic(h, taskFromJson);
                 }
-                h.sendResponseHeaders(200, 0);
             } else {
-                log.warn("/tasks/epic is waiting GET/POST/DELETE request, but {} got ", h.getRequestMethod());
+                log.warn("/tasks/epics is waiting GET/POST/DELETE request, but {} got ", h.getRequestMethod());
                 h.sendResponseHeaders(403, 0);
             }
+        } catch (ValidateException e) {
+            log.error(e.getMessage());
         } finally {
             h.close();
         }
@@ -303,8 +395,8 @@ public class HttpTaskServer {
             log.info(uri.toString());
             if ("GET".equals(h.getRequestMethod())) {
                 List<? extends Task> history = manager.historyManager.getHistory();
-                log.info("get history: {}", history.toString());
                 response = gson.toJson(history);
+                log.info("get history: {}", response);
                 h.sendResponseHeaders(200, response.getBytes().length);
                 try (OutputStream os = h.getResponseBody()) {
                     os.write(response.getBytes());

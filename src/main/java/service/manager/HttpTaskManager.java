@@ -29,7 +29,6 @@ public class HttpTaskManager extends InMemoryTaskManager implements TaskManager 
 
     private final KVTaskClient httpClient;
     private static final String historyHeader = "history";
-    private static final Logger log = LoggerFactory.getLogger(HttpTaskManager.class);
 
     public HttpTaskManager(String url) {
         httpClient = new KVTaskClient(url);

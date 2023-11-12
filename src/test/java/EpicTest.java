@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class EpicTest extends TaskManagerTest<InMemoryTaskManager> {
 
-
     @BeforeEach
     void before() {
         manager = new InMemoryTaskManager();
@@ -53,7 +52,9 @@ public class EpicTest extends TaskManagerTest<InMemoryTaskManager> {
         Epic epic1 = new Epic("EPIC 1", "EPIC DESCRIPTION 1");
         int epicId = manager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId());
+        LocalDateTime time = LocalDateTime.now().plusDays(1);
+        Duration duration = Duration.ofSeconds(1);
+        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId(), duration, time);
         int subtaskId = manager.addSubtask(subtask1);
         subtask1.setTaskStatus(TaskStatus.DONE);
         subtask1.setId(subtaskId);
@@ -73,7 +74,9 @@ public class EpicTest extends TaskManagerTest<InMemoryTaskManager> {
         Epic epic1 = new Epic("EPIC 1", "EPIC DESCRIPTION 1");
         int epicId = manager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId());
+        LocalDateTime time = LocalDateTime.now().plusDays(1);
+        Duration duration = Duration.ofSeconds(1);
+        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId(), duration, time);
         int subtaskId = manager.addSubtask(subtask1);
         subtask1.setTaskStatus(TaskStatus.IN_PROGRESS);
         subtask1.setId(subtaskId);
@@ -93,13 +96,17 @@ public class EpicTest extends TaskManagerTest<InMemoryTaskManager> {
         Epic epic1 = new Epic("EPIC 1", "EPIC DESCRIPTION 1");
         int epicId = manager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId());
+        LocalDateTime time = LocalDateTime.now().plusDays(1);
+        LocalDateTime time2 = LocalDateTime.now().plusDays(5);
+        Duration duration = Duration.ofSeconds(1);
+        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId(), duration, time);
         int subtaskId = manager.addSubtask(subtask1);
+
         subtask1.setTaskStatus(TaskStatus.DONE);
         subtask1.setId(subtaskId);
         manager.updateSubtask(subtask1);
 
-        Subtask subtask2 = new Subtask("SUBTASK 2", "SUBTASK DESCRIPTION 1", epic1.getId());
+        Subtask subtask2 = new Subtask("SUBTASK 2", "SUBTASK DESCRIPTION 2", epic1.getId(), duration, time2);
         manager.addSubtask(subtask2);
 
         Epic savedEpic = (Epic) manager.getEpicById(epicId);
@@ -125,13 +132,16 @@ public class EpicTest extends TaskManagerTest<InMemoryTaskManager> {
         Epic epic1 = new Epic("EPIC 1", "EPIC DESCRIPTION 1");
         int epicId = manager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId());
+        LocalDateTime time = LocalDateTime.now().plusDays(1);
+        LocalDateTime time2 = LocalDateTime.now().plusDays(5);
+        Duration duration = Duration.ofSeconds(1);
+        Subtask subtask1 = new Subtask("SUBTASK 1", "SUBTASK DESCRIPTION 1", epic1.getId(), duration, time);
         int subtaskId = manager.addSubtask(subtask1);
         subtask1.setTaskStatus(TaskStatus.DONE);
         subtask1.setId(subtaskId);
         manager.updateSubtask(subtask1);
 
-        Subtask subtask2 = new Subtask("SUBTASK 2", "SUBTASK DESCRIPTION 1", epic1.getId());
+        Subtask subtask2 = new Subtask("SUBTASK 2", "SUBTASK DESCRIPTION 2", epic1.getId(), duration, time2);
         int subtaskId2 = manager.addSubtask(subtask2);
 
         Epic savedEpic = (Epic) manager.getEpicById(epicId);

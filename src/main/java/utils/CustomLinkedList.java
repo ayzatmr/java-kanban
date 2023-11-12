@@ -8,16 +8,16 @@ import java.util.List;
 import java.util.Map;
 
 public class CustomLinkedList {
-    int size;
-    Node head;
-    Node tail;
-    Map<Integer, Node> map = new HashMap<>();
+    private int size;
+    private Node head;
+    private Node tail;
+    private Map<Integer, Node> map = new HashMap<>();
 
     public static class Node {
-        int key;
-        Task data;
-        Node previous;
-        Node next;
+        private int key;
+        private Task data;
+        private Node previous;
+        private Node next;
 
         public Node(int key, Task data) {
             this.key = key;
